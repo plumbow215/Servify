@@ -49,6 +49,40 @@ def get_bookmarked_service_records():
     conn.close()
     return records
 
+def init_community_service_db():
+    conn = sqlite3.connect("volunteers.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS community_service_listings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            date TEXT NOT NULL,
+            location TEXT NOT NULL,
+            organizer TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def save_community_service_listing(title, description, date, location, organizer):
+    conn = sqlite3.connect("volunteers.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO community_service_listings (title, description, date, location, organizer) 
+        VALUES (?, ?, ?, ?, ?)
+    """, (title, description, date, location, organizer))
+    conn.commit()
+    conn.close()
+
+def get_community_service_listings():
+    conn = sqlite3.connect("volunteers.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM community_service_listings")
+    listings = cursor.fetchall()
+    conn.close()
+    return listings
+
 if __name__ == "__main__":
     init_db()
     init_community_service_db()
