@@ -31,6 +31,17 @@ def get_volunteers():
     conn.close()
     return volunteers
 
+def save_user_profile(username, email, password_hash, full_name=None, bio=None, profile_picture=None):
+    conn = sqlite3.connect("volunteers.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+    INSERT INTO user_profile (username, email, password_hash, full_name, bio, profile_picture, created_on)
+    VALUES (?, ?, ?, ?, ?, ?, datetime('now'))"""
+                   (username, email, password_hash, full_name, bio, profile_picture)
+    )
+conn.commit()
+conn.close()
+
 if __name__ == "__main__":
     init_db()
     print("Database initialized successfully.")
