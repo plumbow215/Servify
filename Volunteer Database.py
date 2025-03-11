@@ -51,4 +51,5 @@ def get_bookmarked_service_records():
 
 if __name__ == "__main__":
     init_db()
+    init_community_service_db()
     print("Database initialized successfully.")
