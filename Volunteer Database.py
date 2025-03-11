@@ -50,7 +50,16 @@ def get_user_profile_by_username(username):
     conn.close()
     return profile
 
+def get_all_user_profiles():
+    conn = sqlite3.connect(volunteers.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user_profile")
+    profiles = cursor.fetchall()
+    conn.close()
+    return profiles
+
 
 if __name__ == "__main__":
     init_db()
+    init_user_profile_db()
     print("Database initialized successfully.")
