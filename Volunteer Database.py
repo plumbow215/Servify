@@ -83,6 +83,33 @@ def get_community_service_listings():
     conn.close()
     return listings
 
+def save_user_profile(username, email, password_hash, full_name=None, bio=None, profile_picture=None):
+    conn = sqlite3.connect("volunteers.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+    INSERT INTO user_profile (username, email, password_hash, full_name, bio, profile_picture, created_on)
+    VALUES (?, ?, ?, ?, ?, ?, datetime('now'))"""
+                   (username, email, password_hash, full_name, bio, profile_picture)
+    )
+    conn.commit()
+    conn.close()
+
+def get_user_profile_by_username(username):
+    conn = sqlite3.connect("volunteers.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user_profile WHERE username = ?", (username))
+    profile = cursor.fetchone()
+    conn.close()
+    return profile
+
+def get_all_user_profiles():
+    conn = sqlite3.connect(volunteers.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user_profile")
+    profiles = cursor.fetchall()
+    conn.close()
+    return profiles
+                           
 if __name__ == "__main__":
     init_db()
     init_community_service_db()
