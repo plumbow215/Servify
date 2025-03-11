@@ -42,6 +42,15 @@ def save_user_profile(username, email, password_hash, full_name=None, bio=None, 
 conn.commit()
 conn.close()
 
+def get_user_profile_by_username(username):
+    conn = sqlite3.connect("volunteers.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user_profile WHERE username = ?", (username))
+    profile = cursor.fetchone()
+    conn.close()
+    return profile
+
+
 if __name__ == "__main__":
     init_db()
     print("Database initialized successfully.")
