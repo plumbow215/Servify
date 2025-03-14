@@ -1,5 +1,5 @@
 from flet import *
-from Components import *
+from UIComponents import *
     
 class Dashboard(Row):
     def __init__(self, pageHeight : int, pageWidth : int):

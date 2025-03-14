@@ -1,5 +1,5 @@
 from flet import *
-from Components import *
+from UIComponents import *
 
 class SRSearchBar(Card):
      def __init__(self, page):
