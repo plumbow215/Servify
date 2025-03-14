@@ -9,5 +9,5 @@ How to run the menu interface:
 -  pip install uvicorn
 -  pip install fastapi
 - Download the entire source code and put it in that folder
-- Type in ` uvicorn main:app --reload ` in the terminal (without the `)
-- Type in ` flet run main.py ` in the terminal (without the `) or just run main.py normally
+- Type in ` uvicorn main:app --reload ` in the terminal
+- Type in ` flet run main.py ` in the terminal or just run main.py normally
