@@ -1,76 +1,76 @@
-from flet import *
+import flet as ft
+from UIComponents import LoginField
+import httpx
+import json
 
-class LoginField(TextField):
-    def __init__(self, Label : str, isPassword : bool, pageWidth : int):
-        super().__init__()
-        
-        if isPassword:
-            self.password = True
-            self.can_reveal_password = True
-            self.prefix_icon = Icons.LOCK
-        elif isPassword == False:
-            self.prefix_icon = Icons.EMAIL
-        
-        self.width = pageWidth
-        self.label = Label
-        self.border_radius = 5
-
-class Login(Container):
+class Login(ft.Container):
     def __init__(self, page):
         super().__init__()
         
-        self.alignment = alignment.center
-        self.bgcolor = Colors.GREEN_600
+        self.alignment = ft.alignment.center
+        self.bgcolor = ft.Colors.GREEN_600
         self.width=400
         self.height=400
         self.border_radius=10
-        self.padding=padding.only(left=20, right=20)
+        self.padding=ft.padding.only(left=20, right=20)
+        
+        self.email_field = LoginField.LoginField("Email", False, page.width)
+        self.password_field = LoginField.LoginField("Password", True, page.width)
+        self.status_text = ft.Text("", color=ft.Colors.RED, weight=ft.FontWeight.BOLD)
+        
         self.content=(
-            Column(
-                alignment=MainAxisAlignment.CENTER,
+            ft.Column(
+                alignment=ft.MainAxisAlignment.CENTER,
                 controls=[
                     # Header
-                    Container(
-                        alignment=alignment.center,
-                        content=Text(value="Sign in to Servify", weight=FontWeight.BOLD, size=30, text_align=TextAlign.CENTER)
+                    ft.Container(
+                        alignment=ft.alignment.center,
+                        content=ft.Text(value="Sign in to Servify", weight=ft.FontWeight.BOLD, size=30, text_align=ft.TextAlign.CENTER)
                     ),
-                    Container(
-                        alignment=alignment.center,
-                        content=Text(value="Volunteer to organized events!", color=Colors.BLACK54)
+                    ft. Container(
+                        alignment=ft.alignment.center,
+                        content=ft.Text(value="Volunteer to organized events!", color=ft.Colors.BLACK54)
                     ),
                     
                     # Email & Password
-                    LoginField("Email", False, page.width),
-                    LoginField("Password", True, page.width),
-                    Container(
-                        alignment=alignment.center,
-                        content=TextButton(
+                    self.email_field,
+                    self.password_field,
+                    
+                    ft.Container(
+                        alignment=ft.alignment.center,
+                        content=ft.TextButton(
+                                on_click=lambda _: page.go('/ForgotPassword'),
                                     content=(
-                                        Text(value="Forgot password?", weight=FontWeight.BOLD, color=Colors.BLACK)
+                                        ft.Text(value="Forgot password?", weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK)
                                     )
                                 ),
                     ),
                     
                     # Login Button
-                    Container(
-                        bgcolor=Colors.BLACK87,
+                    ft.Container(
+                        bgcolor=ft.Colors.BLACK87,
                         width=page.width,
                         height=50,
                         border_radius=5,
-                        alignment=alignment.center,
-                        on_click=lambda _: page.go('/Dashboard'),
+                        alignment=ft.alignment.center,
+                        on_click=self.login,
                         content=(
-                            Text(value="Login", size=20, weight=FontWeight.BOLD, color=Colors.WHITE)
+                            ft.Text(value="Login", size=20, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
                         )
                     ),
                     
-                    Container(
+                    ft. Container(
+                        alignment=ft.alignment.center,
+                        content=self.status_text
+                    ),
+                    
+                    ft.Container(
                         content=(
-                            Row(
-                                alignment=MainAxisAlignment.CENTER,
+                            ft.Row(
+                                alignment=ft.MainAxisAlignment.CENTER,
                                 controls=[
-                                    Text("Don't have an account?"),
-                                    TextButton(content=Text(value="Register Now!", weight=FontWeight.BOLD, color=Colors.BLACK))
+                                    ft.Text("Don't have an account?"),
+                                    ft.TextButton(content=ft.Text(value="Register Now!", weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK), on_click=lambda _: page.go('/Register'))
                                 ]
                             )
                         )    
@@ -78,25 +78,45 @@ class Login(Container):
                 ]
             )
         )
+        
+    async def login(self, e):
+        email = self.email_field.value
+        password = self.password_field.value
+        
+        url = "http://127.0.0.1:8000/users/verify-login"
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, params={"email":email, "password":password})
+            
+            # if its successful then
+            if response.status_code == 200:
+                self.page.go("/Dashboard")
+                    
+            else:
+                self.email_field.border_color=ft.Colors.RED
+                self.password_field.border_color=ft.Colors.RED
+                self.status_text.value = response.json().get("detail")
+                self.page.update()
+        
 
 # When you click on the Logout button, it shows the Login Page
-class Page(View):
+class Page(ft.View):
     def __init__(self,page):
         super().__init__()
         
-        self.bgcolor = Colors.BLACK
+        self.bgcolor = ft.Colors.BLACK
         self.route="/"
         self.controls=[
-            AppBar(
-                    bgcolor=Colors.BLACK,
-                    title=Text("Servify", color=Colors.WHITE, weight=FontWeight.BOLD, size=35),
+            ft.AppBar(
+                    bgcolor=ft.Colors.BLACK,
+                    title=ft.Text("Servify", color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD, size=35),
                 ),
-            Container(
+            ft.Container(
                 expand=True,
                 width=page.width,
                 height=page.height,
-                bgcolor=Colors.BLACK12,
-                alignment=Alignment(0,-.35),
+                bgcolor=ft.Colors.BLACK12,
+                alignment=ft.Alignment(0,-.35),
                 content=Login(page)
             )
         ]

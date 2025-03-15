@@ -1,5 +1,5 @@
 from flet import *
-from Components import IconText
+from UIComponents import IconText
 
 class UI(Container):
     def __init__(self, page):

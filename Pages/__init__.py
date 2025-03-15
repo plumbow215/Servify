@@ -1,1 +1,1 @@
-__all__ = ["Dashboard", "Login", "Profile", "ServiceRecords"]
+__all__ = ["Dashboard", "Login", "Profile", "ServiceRecords", "Register", "ForgotPassword"]

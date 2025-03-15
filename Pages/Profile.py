@@ -1,6 +1,6 @@
 from flet import *
-from Components import Sidebar
-from Components import *
+from UIComponents import Sidebar
+from UIComponents import *
 
 class Information(Container):
     def __init__(self, Label, Info):
