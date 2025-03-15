@@ -7,26 +7,26 @@ router = APIRouter(prefix="/Profile")
 DB_PATH = "Servify.db"
 
 
-async def get_current_user_id():
-    user_id = session.get_user_id()
-    if not user_id:
+async def get_current_user_UserId():
+    user_UserId = session.get_user_UserId()
+    if not user_UserId:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    return user_id
+    return user_UserId
 
-# Get user profile by user ID
-@router.get("/{user_id}", response_model=dict)
-async def get_user_profile_by_id(user_id: int):
+# Get user profile by user UserId
+@router.get("/{user_UserId}", response_model=dict)
+async def get_users_by_UserId(user_UserId: int):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM user_profile WHERE id = ?", (user_id,))
+    cursor.execute("SELECT * FROM users WHERE UserId = ?", (user_UserId,))
     profile = cursor.fetchone()
     conn.close()
 
     if profile is None:
-        raise HTTPException(status_code=404, detail="User profile not found")
+        raise HTTPException(status_code=404, detail="users not found")
 
     return {
-        "id": profile[0],
+        "UserId": profile[0],
         "username": profile[1],
         "email": profile[2],
         "password_hash": profile[3],
@@ -38,21 +38,21 @@ async def get_user_profile_by_id(user_id: int):
 
 # Get current user's profile
 @router.get("/me", response_model=dict)
-async def get_current_user_profile(user_id: int = Depends(get_current_user_id)):
-    return get_user_profile_by_id(user_id)
+async def get_current_users(user_UserId: int = Depends(get_current_user_UserId)):
+    return get_users_by_UserId(user_id)
 
 # Get all
 @router.get("/", response_model=list[dict])
-async def get_all_user_profiles():
+async def get_all_users():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM user_profile")
+    cursor.execute("SELECT * FROM users")
     profiles = cursor.fetchall()
     conn.close()
 
     return [
         {
-            "id": row[0],
+            "UserId": row[0],
             "username": row[1],
             "email": row[2],
             "password_hash": row[3],
@@ -66,7 +66,7 @@ async def get_all_user_profiles():
 
 # Create
 @router.post("/", response_model=dict)
-async def create_user_profile(
+async def create_users(
     username: str,
     email: str,
     password_hash: str,
@@ -78,7 +78,7 @@ async def create_user_profile(
     cursor = conn.cursor()
     cursor.execute(
         """
-        INSERT INTO user_profile (username, email, password_hash, full_name, bio, profile_picture, created_on)
+        INSERT INTO users (username, email, password_hash, full_name, bio, profile_picture, created_on)
         VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
         """,
         (username, email, password_hash, full_name, bio, profile_picture),
@@ -86,12 +86,12 @@ async def create_user_profile(
     conn.commit()
     conn.close()
 
-    return {"message": "User profile created"}
+    return {"message": "users created"}
 
 # Update
-@router.put("/{user_id}", response_model=dict)
-async def update_user_profile(
-    user_id: int,
+@router.put("/{user_UserId}", response_model=dict)
+async def update_users(
+    user_UserId: int,
     username: str = None,
     email: str = None,
     password_hash: str = None,
@@ -126,22 +126,22 @@ async def update_user_profile(
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
 
-    query = f"UPDATE user_profile SET {', '.join(updates)} WHERE id = ?"
-    params.append(user_id)
+    query = f"UPDATE users SET {', '.join(updates)} WHERE UserId = ?"
+    params.append(user_UserId)
 
     cursor.execute(query, params)
     conn.commit()
     conn.close()
 
-    return {"message": "User profile updated "}
+    return {"message": "users updated "}
 
 # Delete
-@router.delete("/{user_id}", response_model=dict)
-async def delete_user_profile(user_id: int):
+@router.delete("/{user_UserId}", response_model=dict)
+async def delete_users(user_UserId: int):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM user_profile WHERE id = ?", (user_id,))
+    cursor.execute("DELETE FROM users WHERE UserId = ?", (user_UserId,))
     conn.commit()
     conn.close()
 
-    return {"message": "User profile deleted "}
+    return {"message": "users deleted "}
