@@ -1,94 +1,139 @@
-from flet import *
+import flet as ft
 from UIComponents import Sidebar
 from UIComponents import *
+import httpx, json
 
-class Information(Container):
-    def __init__(self, Label, Info):
+class Profile(ft.Container):
+    def __init__(self, page):
         super().__init__()
         
-        self.alignment=alignment.center
-        self.content=(
-            Column(
-                controls=[
-                    Text(Label, weight=FontWeight.BOLD, size=17),
-                    Text(Info, text_align=TextAlign.CENTER)
-                ]
-            )
-        )
-
-class Profile(Container):
-    def __init__(self, page, realName:None, userName:None, Email:None, aboutMe:None, accountCreation:None, lastActive:None, Services:None):
-        super().__init__()
-        
-        self.bgcolor=Colors.GREEN_600
+        self.page = page
+        self.bgcolor=ft.Colors.GREEN_600
         self.width=980
         self.height=page.height
         self.padding=20
         self.border_radius=20
-        self.content=(
-            Column(
+        
+        #self.realName = ft.TextField(label="Name", value=realName, read_only=True),
+        self.emailAddress = ft.TextField(label="Email Address", read_only=True, prefix_icon=ft.Icons.EMAIL)
+        self.username = ft.TextField(label="Username", read_only=True, prefix_icon=ft.Icons.ALTERNATE_EMAIL)
+        self.aboutMe = ft.TextField(label="About Me", read_only=True, multiline=True)
+        self.accountCreation = ft.Container(
+            content=ft.Column(
                 controls=[
-                    Text("Profile", size=40, weight=FontWeight.BOLD),
-                    #profile + information
-                    Row(
-                        controls=[
-                            CircleAvatar(
-                                width=100,
-                                height=100,
-                                bgcolor=Colors.BLACK,
-                                content=Text("FF", color=Colors.ORANGE)
-                            ),
-                            Information("Account Creation", accountCreation),
-                            Information("Last Active", lastActive),
-                            Information("Services", Services)
-                        ]
-                    ),
-                    Divider(color=Colors.BLACK),
-                    
-                    #real name
-                    TextField(label="Name", value=realName, read_only=True),
-                    Divider(color=Colors.BLACK),
-                    
-                    #email
-                    TextField(label="Email Address",value=Email, read_only=True, prefix_icon=Icons.EMAIL),
-                    Divider(color=Colors.BLACK),
-                    
-                    #username
-                    TextField(label="Username",value=userName, read_only=True, prefix_icon=Icons.ALTERNATE_EMAIL),
-                    Divider(color=Colors.BLACK),
-                    
-                    #aboutme
-                    TextField(label="About Me", value=aboutMe, read_only=True, multiline=True),
+                    ft.Text("Created On", weight=ft.FontWeight.BOLD, size=17),
+                    ft.Text("Loading..", text_align=ft.TextAlign.CENTER)
                 ]
             )
         )
+        
+        self.lastActive = ft.Container(
+            content=ft.Column(
+                controls=[
+                    ft.Text("Last Active", weight=ft.FontWeight.BOLD, size=17),
+                    ft.Text("Loading..", text_align=ft.TextAlign.CENTER)
+                ]
+            )
+        )
+        self.Services = ft.Container(
+            content=ft.Column(
+                controls=[
+                    ft.Text("No. of Services", weight=ft.FontWeight.BOLD, size=17),
+                    ft.Text("Loading..", text_align=ft.TextAlign.CENTER)
+                ]
+            )
+        )
+        
+        self.Column = ft.Column(
+                controls=[
+                    ft.Text("Profile", size=40, weight=ft.FontWeight.BOLD), #[0]
+                    #profile + information
+                    ft.Row(                                                 #[1]
+                        controls=[
+                            ft.CircleAvatar(
+                                width=100,
+                                height=100,
+                                bgcolor=ft.Colors.BLACK,
+                                content=ft.Text("FF", color=ft.Colors.ORANGE)
+                            ),
+                            self.accountCreation,
+                            self.lastActive,
+                            self.Services
+                        ]
+                    ),
+                    ft.Divider(color=ft.Colors.BLACK),                      #[2]
+                    
+                    #email
+                    self.emailAddress,                                      #[3]
+                    ft.Divider(color=ft.Colors.BLACK),                      #[4]
+                    
+                    #username
+                    self.username,                                          #[5]
+                    ft.Divider(color=ft.Colors.BLACK),                      #[6]
+                    
+                    #aboutme
+                    self.aboutMe                                            #[7]
+                ]
+            )
+        
+        self.content=self.Column
+        
+        self.displayProfile()
+    
+    def displayProfile(self):
+        with open("Backend/session.json", "r") as file:
+            session_data = json.load(file)
+                
+        url = f"http://127.0.0.1:8000/Profile/{session_data['user_id']}"
+        
+        with httpx.Client() as client:
+            
+            
+            response = client.get(url, params={"user_id": session_data["user_id"]})
+            
+            if response.status_code == 200:
+                data = response.json()
+
+                if "user" in data:
+                    user = data["user"][0]
+                    
+                    self.username.value = user["username"]
+                    self.emailAddress.value = user["email"]
+                    self.aboutMe.value = user["aboutMe"]
+                    
+                    self.accountCreation.content.controls[1].value = user['creationDate']
+                    self.lastActive.content.controls[1].value = user["lastActive"]
+                    self.Services.content.controls[1].value = user["services"]
+                    
+                    self.page.update()
+                    
 
 # When you click on the Profile button, it shows the Profile Page
-class Page(View):
+class Page(ft.View):
     def __init__(self, page):
         super().__init__()
         
-        self.bgcolor = Colors.BLACK
+        self.bgcolor = ft.Colors.BLACK
         self.route="/Dashboard/Profile",
         self.controls=[
-            AppBar(
-                bgcolor=Colors.BLACK,
-                title=Text("Servify", color=Colors.WHITE, weight=FontWeight.BOLD, size=35),
+            ft.AppBar(
+                bgcolor=ft.Colors.BLACK,
+                title=ft.Text("Servify", color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD, size=35),
             ),
-            Container(
-                bgcolor=Colors.BLACK,
+            ft.Container(
+                bgcolor=ft.Colors.BLACK,
                 expand=True,
                 width=page.width,
                 height=page.height,
-                alignment=alignment.center,
+                alignment=ft.alignment.center,
                 content=(
-                    Row(
+                    ft.Row(
                         expand=True,
                         width=page.window.width,
                         height=page.window.height,
                         controls=[
                             Sidebar.UI(page),
-                            Profile(page, "Ethan Guardian", "plumbow", "ejmguardian@mymail.mapua.edu.ph", None, "17 Feb 2025", "25 Feb 2025", 1)
+                            Profile(page)
                         ]
                     )
                 )

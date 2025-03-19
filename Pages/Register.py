@@ -1,6 +1,6 @@
 import flet as ft
 from UIComponents import LoginField
-import httpx
+import httpx, json
 
 class Register(ft.Container):
     def __init__(self, page):
@@ -63,7 +63,7 @@ class Register(ft.Container):
                 ]
             )
         )
-        
+    
     async def create_account(self , e):
         username = self.Username.value
         email = self.Email.value
@@ -77,7 +77,7 @@ class Register(ft.Container):
             print(response.status_code)
             
             if response.status_code == 200:
-                self.page.go("/")
+                self.page.go("/Register/Role")
             else:
                 self.Username.border_color = ft.Colors.RED
                 self.Email.border_color = ft.Colors.RED
@@ -92,7 +92,7 @@ class Page(ft.View):
         super().__init__()
         
         self.bgcolor = ft.Colors.BLACK
-        self.route="/"
+        self.route="/Register"
         self.controls=[
             ft.AppBar(
                     bgcolor=ft.Colors.BLACK,
