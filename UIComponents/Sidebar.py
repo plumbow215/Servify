@@ -24,3 +24,21 @@ class UI(Container):
                 )
             )
     
+class OrganizerUI(UI):
+    def __init__(self, page):
+        super().__init__(page)
+        
+        self.content=(
+            Column(
+                    controls=[
+                        IconText.createIconWithText(Icons.PERSON, "Profile", lambda _: page.go('/Dashboard/Profile')) , 
+                        Divider(),
+                        IconText.createIconWithText(Icons.ADD, "Create an Event", lambda _: page.go('/Organizer/Dashboard/OrganizeEvent')) ,
+                        Divider(),
+                        IconText.createIconWithText(Icons.DASHBOARD, "Dashboard", lambda _: page.go('/Organizer/Dashboard')),
+                        Divider(),
+                        IconText.createIconWithText(Icons.LOGOUT, "Log Out", lambda _: page.go('/'))
+                    ]
+                )
+        )
+        

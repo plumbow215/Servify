@@ -37,8 +37,17 @@ def main(page: ft.Page) -> None:
         pageRerouting = {
             "/Dashboard/ServiceRecords": ServiceRecords.Page(page),
             "/Dashboard/Profile": Profile.Page(page),
+            "/Dashboard/Event": Events.Page(page),
             "/Dashboard": Dashboard.Page(page),
+            
+            "/Organizer/Dashboard/OrganizeEvent": OrganizeEvent.Page(page),
+            "/Organizer/Dashboard": OrganizerDashboard.Page(page),
+            
+            "/Register/Role": Role.Page(page),
+            "/Register/Skills": Skills.Page(page),
+            "/Register/Interests": Interests.Page(page),
             "/Register": Register.Page(page),
+            
             "/ForgotPassword": ForgotPassword.Page(page),
             "/": Login.Page(page),
         }

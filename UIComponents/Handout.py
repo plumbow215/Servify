@@ -1,48 +1,62 @@
-from flet import *
+import flet as ft
+import UIComponents.IconText as IconText
+import httpx, json
 
-class CSListing(Card): 
-    def __init__(self, pageWidth : int, Publisher : str, publishedSince : str, Title : str, Description : str):
+class CSListing(ft.Card): 
+    def __init__(self, page, EventId : int, Publisher : str, publishedSince : str, Title : str, Description : str):
         super().__init__()
         
+        self.EventId = EventId
         maxHeight = 300
-        containerBGColor = Colors.GREEN
-        textColor = Colors.WHITE
+        containerBGColor = ft.Colors.GREEN
+        textColor = ft.Colors.WHITE
         
         self.expand = True
         self.elevation = 15 
-        self.shadow_color = colors.BLACK
+        self.shadow_color = ft.colors.BLACK
         self.height = maxHeight
-        self.width = pageWidth
+        self.width = page.width
         
-        self.content=Container(
+        self.viewEvent = ft.TextButton(
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10), bgcolor=ft.Colors.GREEN_600),
+            on_click=self.onClick,
+            content=ft.Row(
+                controls=[
+                    ft.Container(content=ft.Icon(name=ft.Icons.SUBDIRECTORY_ARROW_RIGHT, color=ft.Colors.BLACK12)),
+                    ft.Text("View Event", color=ft.Colors.BLACK)
+                ]
+            )
+        )
+        
+        self.content=ft.Container(
             bgcolor=containerBGColor,
             border_radius=10,
             height=maxHeight,
-            width=pageWidth,
+            width=page.width,
             
-            content=Column(
+            content=ft.Column(
                 expand=True,
                 spacing=10,
                 controls=[
                     #title (task title)
-                    Container(
-                        margin=margin.only(top=20, left=30),
-                        alignment=alignment.center_left,
+                    ft.Container(
+                        margin=ft.margin.only(top=20, left=30),
+                        alignment=ft.alignment.center_left,
                         bgcolor=containerBGColor,
-                        content=Text(Title, size=30, weight=FontWeight.BOLD)
+                        content=ft.Text(Title, size=30, weight=ft.FontWeight.BOLD)
                     ),
                     
                     #information (user profile, username, published since when)
-                    Container(
-                        margin=margin.only(left=30),
-                        content=Row(
+                    ft.Container(
+                        margin=ft.margin.only(left=30),
+                        content=ft.Row(
                             controls=[
-                                Icon(name=Icons.PERSON, color=Colors.BLACK, size=50),
-                                Column(
+                                ft.Icon(name=ft.Icons.PERSON, color=ft.Colors.BLACK, size=50),
+                                ft.Column(
                                     spacing=2,
                                     controls=[
-                                        Text(Publisher, size=20, weight=FontWeight.BOLD),
-                                        Text(publishedSince, size=10, color=colors.BLACK38)
+                                        ft.Text(Publisher, size=20, weight=ft.FontWeight.BOLD),
+                                        ft.Text(publishedSince, size=10, color=ft.colors.BLACK38)
                                     ]
                                 )
                                 
@@ -52,36 +66,21 @@ class CSListing(Card):
                         ),
                     
                     #body (task information)
-                    Container(
+                    ft.Container(
                         width=500,
-                        margin=margin.only(left=30),
-                        alignment=alignment.center_left,
+                        margin=ft.margin.only(left=30),
+                        alignment=ft.alignment.center_left,
                         bgcolor=containerBGColor,
-                        content=Text(Description, size=10)
+                        content=ft.Text(Description, size=10)
                     ),
                     
                     #buttons
-                    Container(
-                        margin=margin.only(left=30),
-                        content=Row(
+                    ft.Container(
+                        margin=ft.margin.only(left=30),
+                        content=ft.Row(
                             spacing=5,
                             controls=[
-                                TextButton (
-                                    style=ButtonStyle(shape=RoundedRectangleBorder(radius=10), bgcolor=Colors.GREEN_600),
-                                    content=Container(content=Icon(name=Icons.BOOKMARK, color=Colors.BLACK12))
-                                ),
-                                
-                                TextButton(
-                                    style=ButtonStyle(shape=RoundedRectangleBorder(radius=10), bgcolor=Colors.GREEN_600),
-                                    content=Row(
-                                        controls=[
-                                            Container(content=Icon(name=Icons.CHAT, color=Colors.BLACK12)),
-                                            Text("Add Response", color=Colors.BLACK)
-                                        ]
-                                    )
-                                ),
-                                
-                                
+                                self.viewEvent
                             ]
                         ),
                     )
@@ -89,3 +88,32 @@ class CSListing(Card):
                 )
         )
         
+    async def onClick(self, e):
+        self.page.go("/Dashboard/Event")
+        
+        with open("Backend/session.json", "r") as file:
+            session_data = json.load(file)
+
+        session_data["event_id"] = self.EventId
+        
+        with open("Backend/session.json", "w") as file:
+            json.dump(session_data, file)
+                    
+                    
+        
+class UserComment(ft.Container):
+    def __init__(self, username : str, comment : str):
+        super().__init__()
+        
+        self.padding=10
+        self.bgcolor=ft.Colors.GREEN_700
+        self.border_radius=15
+        self.User = IconText.createProfileWithText(username)
+        self.Comment = ft.Text(comment)
+        
+        self.content=ft.Column(
+            controls=[
+                self.User,
+                self.Comment
+            ]
+        )

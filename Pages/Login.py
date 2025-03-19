@@ -1,7 +1,6 @@
 import flet as ft
 from UIComponents import LoginField
-import httpx
-import json
+import httpx, json
 
 class Login(ft.Container):
     def __init__(self, page):
@@ -70,7 +69,7 @@ class Login(ft.Container):
                                 alignment=ft.MainAxisAlignment.CENTER,
                                 controls=[
                                     ft.Text("Don't have an account?"),
-                                    ft.TextButton(content=ft.Text(value="Register Now!", weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK), on_click=lambda _: page.go('/Register'))
+                                    ft.TextButton(content=ft.Text(value="Register Now!", weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK), on_click=self.refreshRegistrationJson)
                                 ]
                             )
                         )    
@@ -78,7 +77,15 @@ class Login(ft.Container):
                 ]
             )
         )
+    
+    def refreshRegistrationJson(self, e):
+        self.page.go("/Register")
+        with open("Backend/registration.json", "w") as f:
+            json.dump({"role": "Placeholder", "skills": [], "interests": []}, f, indent=4)
         
+        with open("Backend/session.json", "w") as f:
+            json.dump({"user_id": 0, "event_id": 0, "role": "Volunteer"}, f, indent=4)
+            
     async def login(self, e):
         email = self.email_field.value
         password = self.password_field.value
@@ -90,8 +97,13 @@ class Login(ft.Container):
             
             # if its successful then
             if response.status_code == 200:
-                self.page.go("/Dashboard")
-                    
+                with open("Backend/session.json", "r") as file:
+                    session_data = json.load(file)
+                
+                if session_data["role"] == "Organization":
+                    self.page.go("/Organizer/Dashboard")
+                elif session_data["role"]  == "Volunteer":
+                    self.page.go("/Dashboard")
             else:
                 self.email_field.border_color=ft.Colors.RED
                 self.password_field.border_color=ft.Colors.RED

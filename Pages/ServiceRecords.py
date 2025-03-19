@@ -1,5 +1,7 @@
 from flet import *
 from UIComponents import *
+import Backend.session as session
+import sqlite3, datetime, json
 
 class SRSearchBar(Card):
      def __init__(self, page):
@@ -98,10 +100,12 @@ class ServiceRecords(Row):
     def __init__(self, page):
         super().__init__()
         
+        self.page = page
         self.expand=True,
         self.alignment=alignment.center,
         self.spacing = 10,
         
+        self.Column = Column()
         self.controls=[
                 # main
                 Container(
@@ -135,48 +139,49 @@ class ServiceRecords(Row):
                             #Events
                             SRSearchBar(page),
                             Categories(page),
-                            Column(
-                                controls=[
-                                    SRListing(page, "5/03/2025 10:30AM", "Intramuros", "28/02/2025", "18/02/2025", "Mapua University"),
-                                    SRListing(page, "5/03/2025 10:30AM", "Intramuros", "28/02/2025", "18/02/2025", "Mapua University"),
-                                    SRListing(page, "5/03/2025 10:30AM", "Intramuros", "28/02/2025", "18/02/2025", "Mapua University"),
-                                    SRListing(page, "5/03/2025 10:30AM", "Intramuros", "28/02/2025", "18/02/2025", "Mapua University")
-                                ]
-                            )
+                            self.Column
                         ]
                     )
                 )
         ]
+        
+        self.loadServices(page)
+    
+    def loadServices(self, page):
+        with open("Backend/session.json", "r") as f:
+            session_data = json.load(f)
+
+        user_id = session_data["user_id"]
+        
+        conn = sqlite3.connect("Servify.db")  # Adjust the path if needed
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT EventId FROM USEREVENTS WHERE UserId = ?
+        """, (user_id,))
+        
+        events = cursor.fetchall()
+
+        collected_events = []
+        for eventid in events:
+            cursor.execute("""
+                SELECT venue, publishedSince, publisher FROM EVENTS WHERE EventId = ?
+            """, (eventid[0],))
+            event = cursor.fetchone()
+            collected_events.append(event)
+            
+        for event in collected_events:
+            venue, publishedSince, publisher = event
+            
+            element = SRListing(page, datetime.datetime.now().strftime("%I%M:%S"), venue, datetime.datetime.now().strftime("%d %b %Y"), publishedSince, publisher)
+            self.Column.controls.append(element)
+            
+        self.page.update()
 
 # When you click on the My Service Records button, it shows the Service Records Page
-class Page(View):
+class Page(Page.View):
     def __init__(self, page):
-        super().__init__()
+        super().__init__(page)
         
-        self.bgcolor = Colors.BLACK
-        self.route="/Dashboard",
-        self.controls=[
-            AppBar(
-                bgcolor=Colors.BLACK,
-                title=Text("Servify", color=Colors.WHITE, weight=FontWeight.BOLD, size=35),
-            ),
-            Container(
-                bgcolor=Colors.BLACK,
-                expand=True,
-                width=page.width,
-                height=page.height,
-                alignment=alignment.center,
-                content=(
-                    Row(
-                        expand=True,
-                        width=page.window.width,
-                        height=page.window.height,
-                        controls=[
-                            Sidebar.UI(page),
-                            ServiceRecords(page)
-                        ]
-                    )
-                )
-            )
-        ]
-    
+        self.Row.controls.append(ServiceRecords(page))
+        self.route = "/Dashboard"

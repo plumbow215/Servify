@@ -1,0 +1,14 @@
+{
+    "title": "Waste Disposal",
+    "venue": "Intramuros",
+    "description": "Test Description Waste Disposal blabalbalb",
+    "selected_skills": [
+        "Public speaking",
+        "Teamwork",
+        "Communication",
+        "First aid and safety"
+    ],
+    "selected_theme": "Environment & Sustainability",
+    "date": "24 Mar 2025",
+    "maxParticipants": 12
+}
